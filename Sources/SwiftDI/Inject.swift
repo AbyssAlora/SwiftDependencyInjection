@@ -48,7 +48,7 @@ class Inject<T: Injectable> {
         if let persistentKey = persistentKey {
             self.persistentKey = persistentKey
         } else {
-            self.persistentKey = String(describing: Self.self)
+            self.persistentKey = String(describing: T.self)
         }
 
         if let wrappedValue = wrappedValue {

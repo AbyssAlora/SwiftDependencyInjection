@@ -43,19 +43,24 @@ class TestWrapperClassTransient {
 let environment2 = Environment()
         .define(
                 inject: TestPoint.self,
-                forKey: "test_point",
+                // forKey: "test_point",
                 factory: {
                     TestPoint(x: 15, y: 25)
                 }
         )
 
 class TestWrapperClassPersistent {
-    @Inject
+    @Inject(lifeTime: .persistent)
     var firstInjectedClass: TestInjectClass!
 }
 
 class TestEnvironment {
     @Inject(persistentKey: "test_point")
+    var point: TestPoint!
+}
+
+class TestEnvironment2 {
+    @Inject
     var point: TestPoint!
 }
 
@@ -72,6 +77,7 @@ final class SwiftDITests: XCTestCase {
     }
 
     func testInjectionPersistent() {
+        Environment.default = Environment() // Reset environment
         let injectedWrapperPersistent1 = TestWrapperClassPersistent()
         let injectedWrapperPersistent2 = TestWrapperClassPersistent()
         XCTAssertEqual(injectedWrapperPersistent1.firstInjectedClass, injectedWrapperPersistent2.firstInjectedClass)
@@ -94,6 +100,7 @@ final class SwiftDITests: XCTestCase {
     }
 
     func testInjectionValuePersistent() {
+        Environment.default = Environment() // Reset environment
         let point = TestPoint()
         let injectedWrapper = TestWrapperClassPersistent()
 
@@ -114,7 +121,7 @@ final class SwiftDITests: XCTestCase {
     func testInjectionEnvironment2() {
         Environment.default = environment2
 
-        let testEnvironment = TestEnvironment()
+        let testEnvironment = TestEnvironment2()
 
         XCTAssertEqual(15, testEnvironment.point.x)
         XCTAssertEqual(25, testEnvironment.point.y)
