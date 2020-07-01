@@ -45,28 +45,37 @@ let connector = userServices.service.network.connector
 
 There are three possible states for injected objects:
 - `.ephemeral`  always return a new object
-- `.transient`  return same object until self is alive **(default)**
-- `.persistent` always return same object from persistent container
+- `.transient`  return same object until self is alive 
+- `.persistent` always return same object from persistent container **(default)**
 
 Usage is easy:
 ```swift
 class UserServices {
+
     // Transient object
-    @Inject var transientService: Service!
-    
-    // Another transient object
     @Inject(lifeTime: .transient) var anotherTransientService: Service!
     
     // Ephemeral object
     @Inject(lifeTime: .emphemeral) var empehemeralService: Service!
     
     // Persistent object
-    @Inject(lifeTime: .persistent) var persistentService: Service!
-    
+    @Inject var transientService: Service!
+
     // Keyed persistent object
     @Inject(lifeTime: .persistent, persistentKey: "persistentService") 
     var keyedPersistentService: Service!
 }
+```
+
+### Set injected object through Environment
+
+Objects are automatically stored in `Environment.default` but you can also make
+some configuration:
+
+```swift
+let _ = Environment.default
+            .define(inject: Network.self, forKey: "network")
+            .define(inject: Service.self)
 ```
 
 Contributing

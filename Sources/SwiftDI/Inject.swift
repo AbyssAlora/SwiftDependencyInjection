@@ -11,7 +11,7 @@ import Foundation
 @propertyWrapper
 class Inject<T: Injectable> {
     private(set) var value: T?
-    private var lifeTime: ObjectLifeTime = .transient
+    private var lifeTime: ObjectLifeTime = .persistent
 
     private var persistentKey: String
     
@@ -32,21 +32,18 @@ class Inject<T: Injectable> {
             }
 
             // Lets construct persistent object
-            if let value = InjectPersistentContainer.shared.objects[self.persistentKey] as? T {
-                self.value = value
-            } else {
-                self.value = T.init()
-                InjectPersistentContainer.shared.objects[self.persistentKey] = self.value
+            guard let value = Environment.default.getObject(of: T.self, forKey: self.persistentKey) else {
+                Environment.default.define(inject: T.self, forKey: self.persistentKey)
+                return Environment.default.getObject(of: T.self, forKey: self.persistentKey)
             }
-
-            return self.value // Logic for persistent container is needed
+            return value // Logic for persistent container is needed
         }
         set {
             self.value = newValue // we cas assign new value if needed
         }
     }
 
-    init(lifeTime: ObjectLifeTime = .transient, persistentKey: String? = nil, wrappedValue: T? = nil) {
+    init(lifeTime: ObjectLifeTime = .persistent, persistentKey: String? = nil, wrappedValue: T? = nil) {
         self.lifeTime = lifeTime
         if let persistentKey = persistentKey {
             self.persistentKey = persistentKey
@@ -57,12 +54,10 @@ class Inject<T: Injectable> {
         if let wrappedValue = wrappedValue {
             self.wrappedValue = wrappedValue
         }
-
-        print(self.persistentKey)
     }
 
     convenience init(wrappedValue: T? = nil) {
-        self.init(lifeTime: .transient, persistentKey: nil, wrappedValue: wrappedValue)
+        self.init(lifeTime: .persistent, persistentKey: nil, wrappedValue: wrappedValue)
     }
 
 }
