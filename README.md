@@ -1,6 +1,7 @@
-# SwiftDI
+# SwiftDependencyInjection
 
-Easy Dependency injection in Swift. This is the pure Swift library.  
+Let's share some ideas behind Dependency injection in Swift. 
+This is the small pure Swift library. 
 
 ## Usage
 Usege is pretty easy, you just have to defined your object as `Injectable` 
@@ -44,11 +45,11 @@ let connector = userServices.service.network.connector
 ### Inected objects states
 
 There are three possible states for injected objects:
-- `.ephemeral`  always return a new object
+- `.ephemeral`  always returns a new object
 - `.transient`  return same object until self is alive 
-- `.singleton` always return same object from persistent container **(default)**
+- `.singleton`  always return same object from persistent `Environment` **(default)**
 
-Usage is easy:
+Usage:
 ```swift
 class UserServices {
 
@@ -60,15 +61,17 @@ class UserServices {
     @Inject(lifeTime: .emphemeral) 
     var empehemeralService: Service!
     
-    // Persistent object
+    // Singleton object
     @Inject 
     var transientService: Service!
 
-    // Keyed persistent object
+    // Named singleton object
     @Inject(lifeTime: .singleton, name: "persistentService") 
     var keyedPersistentService: Service!
 }
 ```
+
+If name for `singleton` is not defined, then the class name is used.
 
 ### Set injected object through Environment
 
@@ -135,7 +138,9 @@ let environment = Environment()
         )
 ```
 
-When you have defined you custom environment assign it to the default:
+You can also chain multiple `.define(...)` functions.
+When you have defined your custom environment assign it as default:
+
 ```swift
 Environment.default = environment
 ```
