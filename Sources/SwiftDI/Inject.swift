@@ -11,9 +11,9 @@ import Foundation
 @propertyWrapper
 class Inject<T: Injectable> {
     private(set) var value: T?
-    private var lifeTime: ObjectLifeTime = .transient
+    private var lifeTime: ObjectLifeTime = .singleton
 
-    private var persistentKey: String
+    private var name: String
     
     var wrappedValue: T? {
         get {
@@ -32,37 +32,32 @@ class Inject<T: Injectable> {
             }
 
             // Lets construct persistent object
-            if let value = InjectPersistentContainer.shared.objects[self.persistentKey] as? T {
-                self.value = value
-            } else {
-                self.value = T.init()
-                InjectPersistentContainer.shared.objects[self.persistentKey] = self.value
+            guard let value = Environment.default.getObject(of: T.self, name: self.name) else {
+                _ = Environment.default.define(inject: T.self, name: self.name)
+                return Environment.default.getObject(of: T.self, name: self.name)
             }
-
-            return self.value // Logic for persistent container is needed
+            return value // Logic for persistent container is needed
         }
         set {
             self.value = newValue // we cas assign new value if needed
         }
     }
 
-    init(lifeTime: ObjectLifeTime = .transient, persistentKey: String? = nil, wrappedValue: T? = nil) {
+    init(lifeTime: ObjectLifeTime = .singleton, name: String? = nil, wrappedValue: T? = nil) {
         self.lifeTime = lifeTime
-        if let persistentKey = persistentKey {
-            self.persistentKey = persistentKey
+        if let name = name {
+            self.name = name
         } else {
-            self.persistentKey = String(describing: Self.self)
+            self.name = String(describing: T.self)
         }
 
         if let wrappedValue = wrappedValue {
             self.wrappedValue = wrappedValue
         }
-
-        print(self.persistentKey)
     }
 
     convenience init(wrappedValue: T? = nil) {
-        self.init(lifeTime: .transient, persistentKey: nil, wrappedValue: wrappedValue)
+        self.init(lifeTime: .singleton, name: nil, wrappedValue: wrappedValue)
     }
 
 }
