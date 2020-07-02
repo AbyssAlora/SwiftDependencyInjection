@@ -11,9 +11,9 @@ import Foundation
 @propertyWrapper
 class Inject<T: Injectable> {
     private(set) var value: T?
-    private var lifeTime: ObjectLifeTime = .persistent
+    private var lifeTime: ObjectLifeTime = .singleton
 
-    private var persistentKey: String
+    private var name: String
     
     var wrappedValue: T? {
         get {
@@ -32,9 +32,9 @@ class Inject<T: Injectable> {
             }
 
             // Lets construct persistent object
-            guard let value = Environment.default.getObject(of: T.self, forKey: self.persistentKey) else {
-                Environment.default.define(inject: T.self, forKey: self.persistentKey)
-                return Environment.default.getObject(of: T.self, forKey: self.persistentKey)
+            guard let value = Environment.default.getObject(of: T.self, name: self.name) else {
+                _ = Environment.default.define(inject: T.self, name: self.name)
+                return Environment.default.getObject(of: T.self, name: self.name)
             }
             return value // Logic for persistent container is needed
         }
@@ -43,12 +43,12 @@ class Inject<T: Injectable> {
         }
     }
 
-    init(lifeTime: ObjectLifeTime = .persistent, persistentKey: String? = nil, wrappedValue: T? = nil) {
+    init(lifeTime: ObjectLifeTime = .singleton, name: String? = nil, wrappedValue: T? = nil) {
         self.lifeTime = lifeTime
-        if let persistentKey = persistentKey {
-            self.persistentKey = persistentKey
+        if let name = name {
+            self.name = name
         } else {
-            self.persistentKey = String(describing: T.self)
+            self.name = String(describing: T.self)
         }
 
         if let wrappedValue = wrappedValue {
@@ -57,7 +57,7 @@ class Inject<T: Injectable> {
     }
 
     convenience init(wrappedValue: T? = nil) {
-        self.init(lifeTime: .persistent, persistentKey: nil, wrappedValue: wrappedValue)
+        self.init(lifeTime: .singleton, name: nil, wrappedValue: wrappedValue)
     }
 
 }

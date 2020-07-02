@@ -4,8 +4,8 @@
 
 import Foundation
 
-extension KeyPath where Root: NSObject {
-    var toString: String {
+extension KeyPath: CustomStringConvertible where Root: NSObject {
+    public var description: String {
         NSExpression(forKeyPath: self).keyPath
     }
 }

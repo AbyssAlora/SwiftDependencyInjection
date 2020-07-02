@@ -5,5 +5,5 @@
 import Foundation
 
 protocol PropertyProtocol {
-    func set(for: Injectable)
+    func set(for: NSObject)
 }

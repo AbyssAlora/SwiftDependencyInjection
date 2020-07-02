@@ -46,23 +46,26 @@ let connector = userServices.service.network.connector
 There are three possible states for injected objects:
 - `.ephemeral`  always return a new object
 - `.transient`  return same object until self is alive 
-- `.persistent` always return same object from persistent container **(default)**
+- `.singleton` always return same object from persistent container **(default)**
 
 Usage is easy:
 ```swift
 class UserServices {
 
     // Transient object
-    @Inject(lifeTime: .transient) var anotherTransientService: Service!
+    @Inject(lifeTime: .transient) 
+    var anotherTransientService: Service!
     
     // Ephemeral object
-    @Inject(lifeTime: .emphemeral) var empehemeralService: Service!
+    @Inject(lifeTime: .emphemeral) 
+    var empehemeralService: Service!
     
     // Persistent object
-    @Inject var transientService: Service!
+    @Inject 
+    var transientService: Service!
 
     // Keyed persistent object
-    @Inject(lifeTime: .persistent, persistentKey: "persistentService") 
+    @Inject(lifeTime: .singleton, name: "persistentService") 
     var keyedPersistentService: Service!
 }
 ```
@@ -72,10 +75,69 @@ class UserServices {
 Objects are automatically stored in `Environment.default` but you can also make
 some configuration:
 
+#### example 1: 
 ```swift
-let _ = Environment.default
-            .define(inject: Network.self, forKey: "network")
-            .define(inject: Service.self)
+
+class Point: Injectable {
+    var x: Int = 5
+    var y: Int = 10
+
+    required init() { } // it's required for construction
+}
+
+let environment = Environment()
+        .define(
+                inject: Point.self,
+                name: "test_point"
+        )
+```
+
+#### example 2:
+
+```swift
+class Point: NSObject {
+    var x: Int = 5
+    var y: Int = 10
+
+    init(x: Int, y: Int) {
+        self.x = x
+        self.y = y
+    }
+}
+
+let environment = Environment()
+        .define(
+                inject: TestPoint2.self,
+                name: "test_point",
+                factory: {
+                    TestPoint2(x: 15, y: 25)
+                }
+        )
+```
+
+#### example 3:
+
+```swift
+// @objcMembers
+class Point: NSObject {
+    @objc var x: Int = 5
+    @objc var y: Int = 10
+}
+
+let environment = Environment()
+        .define(
+                inject: TestPoint2.self,
+                name: "test_point",
+                properties: [
+                    Property(value: 10, for: \TestPoint.x),
+                    Property(value: 20, for: \TestPoint.y)
+                ]
+        )
+```
+
+When you have defined you custom environment assign it to the default:
+```swift
+Environment.default = environment
 ```
 
 Contributing
