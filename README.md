@@ -138,6 +138,32 @@ let environment = Environment()
         )
 ```
 
+#### example 4:
+
+You can define Environment as modules through builder
+
+```swift
+let environment = Environment(name: "Main") {
+    Environment(name: "point")
+            .define(
+                    inject: TestPoint2.self,
+                    name: "point",
+                    factory: {
+                        TestPoint2(x: 15, y: 25)
+                    }
+            )
+
+    Environment(name: "testPoint")
+        .define(
+                inject: TestPoint2.self,
+                name: "point", // This produces compilation warning, first will be reassigned 
+                factory: {
+                    TestPoint2(x: 150, y: 250)
+                }
+        )
+}
+```
+
 You can also chain multiple `.define(...)` functions.
 When you have defined your custom environment assign it as default:
 

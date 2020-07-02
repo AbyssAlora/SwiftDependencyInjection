@@ -57,6 +57,27 @@ let environment2 = Environment()
                 }
         )
 
+let environment3 = Environment(name: "Main") {
+
+    Environment(name: "point")
+            .define(
+                    inject: TestPoint2.self,
+                    name: "point",
+                    factory: {
+                        TestPoint2(x: 15, y: 25)
+                    }
+            )
+
+    Environment(name: "testPoint")
+        .define(
+                inject: TestPoint2.self,
+                name: "point",
+                factory: {
+                    TestPoint2(x: 150, y: 250)
+                }
+        )
+}
+
 class TestWrapperClassPersistent {
     @Inject(lifeTime: .singleton)
     var firstInjectedClass: TestInjectClass!
@@ -69,6 +90,11 @@ class TestEnvironment {
 
 class TestEnvironment2 {
     @Inject //(name: "test_point")
+    var point: TestPoint2!
+}
+
+class TestEnvironment3 {
+    @Inject(name: "point")
     var point: TestPoint2!
 }
 
@@ -134,6 +160,15 @@ final class SwiftDependencyInjectionTests: XCTestCase {
         XCTAssertEqual(25, testEnvironment.point.y)
     }
 
+    func testInjectionEnvironment3() {
+        Environment.default = environment3
+
+        let testEnvironment = TestEnvironment3()
+
+        XCTAssertEqual(150, testEnvironment.point.x)
+        XCTAssertEqual(250, testEnvironment.point.y)
+    }
+
     static var allTests = [
         ("testInjectionEphemeral", testInjectionEphemeral),
         ("testInjectionTransient", testInjectionTransient),
@@ -143,5 +178,6 @@ final class SwiftDependencyInjectionTests: XCTestCase {
         ("testInjectionValuePersistent", testInjectionValuePersistent),
         ("testInjectionEnvironment", testInjectionEnvironment),
         ("testInjectionEnvironment2", testInjectionEnvironment2),
+        ("testInjectionEnvironment3", testInjectionEnvironment3),
     ]
 }
