@@ -1,6 +1,6 @@
 import XCTest
 import class Foundation.Bundle
-@testable import SwiftDI
+@testable import SwiftDependencyInjection
 import Foundation
 
 class TestPoint: NSObject {
@@ -72,7 +72,7 @@ class TestEnvironment2 {
     var point: TestPoint2!
 }
 
-final class SwiftDITests: XCTestCase {
+final class SwiftDependencyInjectionTests: XCTestCase {
 
     func testInjectionEphemeral() {
         let injectedWrapperEphemeral = TestWrapperClassEphemeral()

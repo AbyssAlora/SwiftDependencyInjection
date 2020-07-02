@@ -1,7 +1,7 @@
 import XCTest
 
-import SwiftDITests
+import SwiftDependencyInjectionTests
 
 var tests = [XCTestCaseEntry]()
-tests += SwiftDITests.allTests()
+tests += SwiftDependencyInjectionTests.allTests()
 XCTMain(tests)
