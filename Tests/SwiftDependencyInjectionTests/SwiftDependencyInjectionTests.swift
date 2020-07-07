@@ -3,181 +3,90 @@ import class Foundation.Bundle
 @testable import SwiftDependencyInjection
 import Foundation
 
-class TestPoint: NSObject {
-    @objc var x: Int = 5
-    @objc var y: Int = 10
-}
-
-class TestPoint2: NSObject {
-    var x: Int = 5
-    var y: Int = 10
-
-    init(x: Int, y: Int) {
-        self.x = x
-        self.y = y
-    }
-
-    required override init() {
-
-    }
-}
-
-class TestInjectClass: NSObject {
-    @Inject var point: TestPoint!
-    required override init() { }
-}
-
-class TestWrapperClassEphemeral {
-    @Inject(lifeTime: .ephemeral)
-    var firstInjectedClass: TestInjectClass!
-}
-
-class TestWrapperClassTransient {
-    @Inject(lifeTime: .singleton)
-    var firstInjectedClass: TestInjectClass!
-}
-
-// if properties are @objc
-let environment = Environment()
-        .define(
-                inject: TestPoint.self,
-                name: "test_point",
-                properties: [
-                    Property(value: 10, for: \TestPoint.x),
-                    Property(value: 20, for: \TestPoint.y)
-                ]
-        )
-
-let environment2 = Environment()
-        .define(
-                inject: TestPoint2.self,
-//                name: "test_point",
-                factory: {
-                    TestPoint2(x: 15, y: 25)
-                }
-        )
-
-let environment3 = Environment(name: "Main") {
-
-    Environment(name: "point")
-            .define(
-                    inject: TestPoint2.self,
-                    name: "point",
-                    factory: {
-                        TestPoint2(x: 15, y: 25)
-                    }
-            )
-
-    Environment(name: "testPoint")
-        .define(
-                inject: TestPoint2.self,
-                name: "point",
-                factory: {
-                    TestPoint2(x: 150, y: 250)
-                }
-        )
-}
-
-class TestWrapperClassPersistent {
-    @Inject(lifeTime: .singleton)
-    var firstInjectedClass: TestInjectClass!
-}
-
-class TestEnvironment {
-    @Inject(name: "test_point")
-    var point: TestPoint!
-}
-
-class TestEnvironment2 {
-    @Inject //(name: "test_point")
-    var point: TestPoint2!
-}
-
-class TestEnvironment3 {
-    @Inject(name: "point")
-    var point: TestPoint2!
-}
-
 final class SwiftDependencyInjectionTests: XCTestCase {
 
-    func testInjectionEphemeral() {
-        let injectedWrapperEphemeral = TestWrapperClassEphemeral()
-        XCTAssertNotEqual(injectedWrapperEphemeral.firstInjectedClass, injectedWrapperEphemeral.firstInjectedClass)
-    }
-
     func testInjectionTransient() {
-        let injectedWrapperTransient = TestWrapperClassTransient()
+        Injector.env.reset()
+
+        Injector.env.build {
+            PointModule()
+            InjectClassPrototypeModule()
+        }
+
+        let injectedWrapperTransient = TestWrapperClass()
         XCTAssertEqual(injectedWrapperTransient.firstInjectedClass, injectedWrapperTransient.firstInjectedClass)
     }
 
     func testInjectionPersistent() {
-        Environment.default = Environment() // Reset environment
-        let injectedWrapperPersistent1 = TestWrapperClassPersistent()
-        let injectedWrapperPersistent2 = TestWrapperClassPersistent()
+        Injector.env.reset()
+
+        Injector.env.build {
+            PointModule()
+            InjectClassSingletonModule()
+        }
+
+        let injectedWrapperPersistent1 = TestWrapperClass()
+        let injectedWrapperPersistent2 = TestWrapperClass()
         XCTAssertEqual(injectedWrapperPersistent1.firstInjectedClass, injectedWrapperPersistent2.firstInjectedClass)
     }
 
-    func testInjectionValueEphemeral() {
-        let point = TestPoint()
-        let injectedWrapper = TestWrapperClassEphemeral()
-
-        XCTAssertEqual(point.x, injectedWrapper.firstInjectedClass.point.x)
-        XCTAssertEqual(point.y, injectedWrapper.firstInjectedClass.point.y)
-    }
-
     func testInjectionValueTransient() {
+        Injector.env.reset()
+
+        Injector.env.build {
+            PointModule()
+            InjectClassPrototypeModule()
+        }
+
         let point = TestPoint()
-        let injectedWrapper = TestWrapperClassTransient()
+        let injectedWrapper = TestWrapperClass()
 
         XCTAssertEqual(point.x, injectedWrapper.firstInjectedClass.point.x)
         XCTAssertEqual(point.y, injectedWrapper.firstInjectedClass.point.y)
     }
 
     func testInjectionValuePersistent() {
-        Environment.default = Environment() // Reset environment
+        Injector.env.reset()
+
+        Injector.env.build {
+            PointModule()
+            InjectClassSingletonModule()
+        }
+
         let point = TestPoint()
-        let injectedWrapper = TestWrapperClassPersistent()
+        let injectedWrapper = TestWrapperClass()
 
         XCTAssertEqual(point.x, injectedWrapper.firstInjectedClass.point.x)
         XCTAssertEqual(point.y, injectedWrapper.firstInjectedClass.point.y)
     }
 
-    func testInjectionEnvironment() {
-        Environment.default = environment
+    func testInjectionValuePersistentUpdate() {
+        Injector.env.reset()
 
-        let testEnvironment = TestEnvironment()
+        Injector.env.build {
+            PointModule()
+            InjectClassSingletonModule()
+        }
 
-        XCTAssertEqual(10, testEnvironment.point.x)
-        XCTAssertEqual(20, testEnvironment.point.y)
-    }
+        let point = TestPoint(x: 11, y: 10)
+        let injectedWrapper = TestWrapperClass()
 
-    func testInjectionEnvironment2() {
-        Environment.default = environment2
+        injectedWrapper.firstInjectedClass.point.x = 11
+        injectedWrapper.firstInjectedClass.point.y = 10
 
-        let testEnvironment = TestEnvironment2()
+        XCTAssertEqual(point.x, injectedWrapper.firstInjectedClass.point.x)
+        XCTAssertEqual(point.y, injectedWrapper.firstInjectedClass.point.y)
 
-        XCTAssertEqual(15, testEnvironment.point.x)
-        XCTAssertEqual(25, testEnvironment.point.y)
-    }
+        let injectedWrapper2 = TestWrapperClass()
 
-    func testInjectionEnvironment3() {
-        Environment.default = environment3
-
-        let testEnvironment = TestEnvironment3()
-
-        XCTAssertEqual(150, testEnvironment.point.x)
-        XCTAssertEqual(250, testEnvironment.point.y)
+        XCTAssertEqual(point.x, injectedWrapper2.firstInjectedClass.point.x)
+        XCTAssertEqual(point.y, injectedWrapper2.firstInjectedClass.point.y)
     }
 
     static var allTests = [
-        ("testInjectionEphemeral", testInjectionEphemeral),
         ("testInjectionTransient", testInjectionTransient),
         ("testInjectionPersistent", testInjectionPersistent),
-        ("testInjectionValueEphemeral", testInjectionValueEphemeral),
         ("testInjectionValueTransient", testInjectionValueTransient),
         ("testInjectionValuePersistent", testInjectionValuePersistent),
-        ("testInjectionEnvironment", testInjectionEnvironment),
-        ("testInjectionEnvironment2", testInjectionEnvironment2),
-        ("testInjectionEnvironment3", testInjectionEnvironment3),
     ]
 }
