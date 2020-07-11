@@ -8,7 +8,7 @@ import Foundation
 class PointModule: Injector.Component {
 
     @Prototype(name: "x")
-    var x = Factory { env in
+    var x = Factory<Int> { env in
         5
     }
 
@@ -18,11 +18,11 @@ class PointModule: Injector.Component {
     }
 
     @Prototype
-    var componentPoint = Factory<TestPoint> { env in
+    var componentPoint = Factory<Point> { env in
         let (x, y) = (
-                env.getObject(of: Int.self, name: "x"), 
-                env.getObject(of: Int.self, name: "y")
+                env.resolve(Int.self, name: "x")!, 
+                env.resolve(Int.self, name: "y")!
         )
-        return TestPoint(x: x!, y: y!)
+        return TestPoint(x: x, y: y)
     }
 }

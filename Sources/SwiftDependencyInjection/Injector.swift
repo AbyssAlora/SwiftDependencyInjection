@@ -5,7 +5,7 @@
 import Foundation
 
 final class Injector {
-    private var container: [String: AnyFactory] = [:]
+    private var container = [String: AnyFactory]()
 
     static let env = Injector()
 
@@ -19,32 +19,28 @@ final class Injector {
 
     @discardableResult
     func define<T>(name: String? = nil, singleton: T) -> Injector {
-        let name = name ?? String(describing: T.self)
-        self.has(name: name)
-//        self.container[name ?? String(describing: T.self)] = Factory(singleton: singleton)
+        self.define(name: name, factory: SingletonFactory { _ in singleton} )
         return self
     }
 
     @discardableResult
     func define<T>(name: String? = nil, factory: @escaping (Injector)->(T)) -> Injector {
-        let name = name ?? String(describing: T.self)
-        self.has(name: name)
-//        self.container[name ?? String(describing: T.self)] = Factory {
-//            factory(self)
-//        }
+        self.define(name: name, factory: Factory(factory))
         return self
     }
 
     @discardableResult
     func define<T>(name: String? = nil, factory: @escaping ()->(T)) -> Injector {
-        let name = name ?? String(describing: T.self)
-        self.has(name: name)
-//        self.container[name ?? String(describing: T.self)] = Factory(create: factory)
+        self.define(name: name, factory: Factory { _ in factory()})
         return self
     }
 
-    func getObject<T>(of type: T.Type, name: String? = nil) -> T? {
+    func resolve<T>(_ type: T.Type, name: String? = nil) -> T? {
         self.container[name ?? String(describing: T.self)]?.create() as? T
+    }
+
+    static func resolve<T>(_ type: T.Type, name: String? = nil) -> T? {
+        Self.env.resolve(type, name: name)
     }
 
     @discardableResult

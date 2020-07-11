@@ -6,5 +6,7 @@ import Foundation
 @testable import SwiftDependencyInjection
 
 class TestInjectClass: NSObject {
-    @Inject var point: TestPoint!
+    @Inject var point: Point!
+    @Inject(name: "x") var x: Int!
+    @Inject(name: "y") var y: Int!
 }

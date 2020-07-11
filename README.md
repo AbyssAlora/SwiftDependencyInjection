@@ -4,27 +4,148 @@ Let's share some ideas behind Dependency injection in Swift.
 This is the small pure Swift library. 
 
 ## Usage
-Usege is pretty easy, you just have to defined your object as `Injectable` 
-where is required `init()` for object construction. After that, you can **Inject**
-your object wherever you want. 
+Usege is pretty easy, you just have to defined your `Injector` environment. Just for examples let's
+work with these classes and protocols:
 
-### Create an Injectable object
-Just extend from `Injectable` and do whatever you want.
+Animal, Mouse and Cat (where you can see `@Inject var` what's just for example with auto injection) :
+```swift
+protocol Animal {
+    var name: String? { get }
+    var eats: Animal! { get }
+}
+
+extension Animal {
+    var eats: Animal! { nil }
+}
+
+class Cat: Animal {
+    let name: String?
+
+    @Inject(name: "someMouse") 
+    var eats: Animal!
+
+    init(name: String?) {
+        self.name = name
+    }
+}
+
+class Mouse: Animal {
+    let name: String? = "some mouse"
+}
+```
+
+Person etc.:
+```swift
+protocol Person {
+    func playWith() -> Animal
+}
+
+class PetOwner: Person {
+    let pet: Animal
+
+    init(pet: Animal) {
+        self.pet = pet
+    }
+
+    func playWith() -> Animal {
+        pet
+    }
+}
+```
+
+
+### Create and build environment
+There are three possible methods to define environment. In each example we'll work with few classes.
+
+#### Environment with auto registration modules
+
+Auto registration is based on reflection and its called once. First of all you need to create some
+`Injector.Component`. We can define multiple modules and build Injector environment.
 
 ```swift
-class Network: Injectable {
-    let connector: Connector = Connector() // some attributes
-    required init() {
-        //  
+class AnimalComponent: Injector.Component {
+    @Prototype(name: "someMouse")
+    var someMouse = Factory<Animal> { env in
+        Mouse()
     }
-}
 
-class Service: Injectable {
-    @Inject var network: Network!
-    required init() {
-        //  
+    @Singleton(name: "Mimi")
+    var catMimi = Factory<Animal> { env in
+        Cat(name: "Mimi")
     }
 }
+```
+
+and for Person: 
+```swift
+class PersonComponent: Injector.Component {
+    @Singleton
+    var mimiOwner = Factory<Person> { env in
+        PetOwner(pet: env.resolve(Animal.self, name: "Mimi")!)
+    }
+}
+```
+
+Now we need build our environment (for example in `AppDelegate`):
+
+```swift
+Injector.build {
+    AnimalComponent()
+    PersonComponent()
+}
+```
+
+#### Environment with manual registration modules
+
+If we don't want to use auto registration, we can register our modules manually:
+```swift
+class AnimalComponent: Injector.Component {
+
+    static func someMouse() -> Animal {
+        Mouse()
+    }
+
+    static func catMimi() -> Animal {
+        Cat(name: "Mimi")
+    }
+
+    func register() {
+        self.inject(name: "someMouse", factory: Self.someMouse)
+        self.inject(name: "Mimi", singleton: Self.catMimi())
+    }
+}
+```
+
+#### Configure Environment directly
+
+As well as you can configure your environment directly:
+
+```swift
+Injector.env
+    .define(...)
+    .define(...)
+    // etc
+```
+
+### Usage of object from environment
+
+When you have defined environment, then you can `@Inject` objects. First example was shown in `Cat` class:
+```swift
+class Cat: Animal {
+    let name: String?
+
+    @Inject(name: "someMouse") 
+    var eats: Animal!
+
+    init(name: String?) {
+        self.name = name
+    }
+}
+```
+where `eats` is injected directly from `Injector.env`. If you want to resolve objects yourselves just do:
+```swift
+let petOwner = Injector.resolve(Person.self)
+let cat = Injector.resolve(Animal.self, name: "Mimi")
 ```
 
 ### How to use Injected objects
@@ -44,132 +165,10 @@ let connector = userServices.service.network.connector
 
 ### Inected objects states
 
-There are three possible states for injected objects:
-- `.ephemeral`  always returns a new object
-- `.transient`  return same object until self is alive 
-- `.singleton`  always return same object from persistent `Environment` **(default)**
+There are two possible states for injected objects:
+- `@Singleton`  always returns a new object
+- `@Prototype`  return same object until self is alive 
 
-Usage:
-```swift
-class UserServices {
-
-    // Transient object
-    @Inject(lifeTime: .transient) 
-    var anotherTransientService: Service!
-    
-    // Ephemeral object
-    @Inject(lifeTime: .emphemeral) 
-    var empehemeralService: Service!
-    
-    // Singleton object
-    @Inject 
-    var transientService: Service!
-
-    // Named singleton object
-    @Inject(lifeTime: .singleton, name: "persistentService") 
-    var keyedPersistentService: Service!
-}
-```
-
-If name for `singleton` is not defined, then the class name is used.
-
-### Set injected object through Environment
-
-Objects are automatically stored in `Environment.default` but you can also make
-some configuration:
-
-#### example 1: 
-```swift
-
-class Point: Injectable {
-    var x: Int = 5
-    var y: Int = 10
-
-    required init() { } // it's required for construction
-}
-
-let environment = Environment()
-        .define(
-                inject: Point.self,
-                name: "test_point"
-        )
-```
-
-#### example 2:
-
-```swift
-class Point: NSObject {
-    var x: Int = 5
-    var y: Int = 10
-
-    init(x: Int, y: Int) {
-        self.x = x
-        self.y = y
-    }
-}
-
-let environment = Environment()
-        .define(
-                inject: TestPoint2.self,
-                name: "test_point",
-                factory: {
-                    TestPoint2(x: 15, y: 25)
-                }
-        )
-```
-
-#### example 3:
-
-```swift
-// @objcMembers
-class Point: NSObject {
-    @objc var x: Int = 5
-    @objc var y: Int = 10
-}
-
-let environment = Environment()
-        .define(
-                inject: TestPoint2.self,
-                name: "test_point",
-                properties: [
-                    Property(value: 10, for: \TestPoint.x),
-                    Property(value: 20, for: \TestPoint.y)
-                ]
-        )
-```
-
-#### example 4:
-
-You can define Environment as modules through builder
-
-```swift
-let environment = Environment(name: "Main") {
-    Environment(name: "point")
-            .define(
-                    inject: TestPoint2.self,
-                    name: "point",
-                    factory: {
-                        TestPoint2(x: 15, y: 25)
-                    }
-            )
-
-    Environment(name: "testPoint")
-        .define(
-                inject: TestPoint2.self,
-                name: "point", // This produces compilation warning, first will be reassigned 
-                factory: {
-                    TestPoint2(x: 150, y: 250)
-                }
-        )
-}
-```
-
-You can also chain multiple `.define(...)` functions.
-When you have defined your custom environment assign it as default:
-
-```swift
-Environment.default = environment
-```
 
 Contributing
 ------

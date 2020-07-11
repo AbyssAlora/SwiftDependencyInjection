@@ -4,7 +4,12 @@
 
 import Foundation
 
-class TestPoint {
+protocol Point {
+    var x: Int { get set }
+    var y: Int { get set }
+}
+
+class TestPoint: Point {
     var x: Int = 5
     var y: Int = 10
 

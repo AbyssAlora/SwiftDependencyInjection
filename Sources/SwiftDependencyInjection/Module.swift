@@ -5,6 +5,7 @@
 import Foundation
 
 protocol Module {
+    func inject(name: String?, factory: AnyFactory)
     func inject<T>(name: String?, singleton: T)
     func inject<T>(name: String?, factory: @escaping () -> (T))
     func inject<T>(name: String?, factory: @escaping (Injector) -> (T))
@@ -17,16 +18,20 @@ extension Module {
         Injector.env
     }
 
+    func inject(name: String? = nil, factory: AnyFactory) {
+        self.environment.define(name: name, factory: factory)
+    }
+
     func inject<T>(name: String? = nil, singleton: T) {
-        self.environment.define(singleton: singleton)
+        self.environment.define(name: name, singleton: singleton)
     }
 
     func inject<T>(name: String? = nil, factory: @escaping () -> (T)) {
-        self.environment.define(factory: factory)
+        self.environment.define(name: name, factory: factory)
     }
 
     func inject<T>(name: String?, factory: @escaping (Injector) -> (T)) {
-        self.environment.define(factory: factory)
+        self.environment.define(name: name, factory: factory)
     }
 
     func register() {

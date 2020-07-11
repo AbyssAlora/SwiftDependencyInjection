@@ -13,7 +13,7 @@ class InjectClassSingletonModule: Injector.Component {
 }
 
 class InjectClassPrototypeModule: Injector.Component {
-    @Singleton
+    @Prototype
     var componentTestInjectClass = Factory { env in
         TestInjectClass()
     }

@@ -18,11 +18,14 @@ class Inject<T> {
         get {
             value
         }
+        set {
+            self.value = newValue
+        }
     }
 
     init(name: String? = nil, wrappedValue: T? = nil) {
         let name = name ?? String(describing: T.self)
-        self.value = self.environment.getObject(of: T.self, name: name)
+        self.value = self.environment.resolve(T.self, name: name)
     }
 
     convenience init(wrappedValue: T? = nil) {

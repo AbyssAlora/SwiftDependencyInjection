@@ -4,28 +4,6 @@
 
 import Foundation
 
-protocol AnyFactory {
-    func create() -> Any!
-    var name: String { get set }
-    var environment: Injector { get }
-    func singleton() -> AnyFactory
-    func prototype() -> AnyFactory
-}
-
-extension AnyFactory {
-    var environment: Injector {
-        Injector.env
-    }
-
-    func singleton() -> AnyFactory {
-        self
-    }
-
-    func prototype() -> AnyFactory {
-        self
-    }
-}
-
 class Factory<T>: AnyFactory {
 
     var name: String = String(describing: T.self)
@@ -51,22 +29,5 @@ class Factory<T>: AnyFactory {
     }
 }
 
-class SingletonFactory<T>: Factory<T> {
-    var singleton: T!
-
-    override func create() -> Any! {
-        if let singleton = self.singleton {
-            return singleton
-        }
-        self.singleton = self.factory(self.environment)
-        return self.singleton
-    }
-
-    override func prototype() -> AnyFactory {
-        let prototype = Factory<T>(self.factory)
-        prototype.name = self.name
-        return prototype
-    }
-}
 
 
