@@ -148,25 +148,16 @@ let petOwner = Injector.resolve(Person.self)
 let cat = Injector.resolve(Animal.self, name: "Mimi")
 ```
 
-### How to use Injected objects
-When you have injected object you can use those as usual.
-
+and you can access them like this:
 ```swift
-class UserServices {
-    @Inject
-    var service: Service!
-}
-
-let userServices = UserServices()
-
-// lets obtain connector if needed
-let connector = userServices.service.network.connector
+petOwner?.playWith().eats.name
 ```
+
 
 ### Inected objects states
 
 There are two possible states for injected objects:
-- `@Singleton`  always returns a new object
+- `@Singleton`  always returns same object
 - `@Prototype`  return same object until self is alive 
 
 
