@@ -95,6 +95,14 @@ Injector.build {
 }
 ```
 
+or with single component:
+
+```swift
+AnimalComponent().register()
+```
+
+
+
 #### Environment with manual registration modules
 
 If we don't want to use auto registration, we can register our modules manually:
@@ -142,7 +150,8 @@ class Cat: Animal {
     }
 }
 ```
-where `eats` is injected directly from `Injector.env`. If you want to resolve objects yourselves just do:
+where `eats` is injected directly from `Injector.env`. If you want to resolve objects (e.g. in your AppDelegate) 
+yourselves just do:
 ```swift
 let petOwner = Injector.resolve(Person.self)
 let cat = Injector.resolve(Animal.self, name: "Mimi")
