@@ -4,6 +4,6 @@
 
 import Foundation
 
-extension Injector {
+public extension Injector {
     typealias Component = Module
 }

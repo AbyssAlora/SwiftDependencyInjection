@@ -12,8 +12,8 @@ public protocol AnyFactory {
     func prototype() -> AnyFactory
 }
 
-extension AnyFactory {
-    public var environment: Injector {
+public extension AnyFactory {
+    var environment: Injector {
         Injector.env
     }
 }
