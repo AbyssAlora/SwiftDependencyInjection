@@ -4,10 +4,10 @@
 
 import Foundation
 
-class SingletonFactory<T>: Factory<T> {
+public class SingletonFactory<T>: Factory<T> {
     var singleton: T!
 
-    override func create() -> Any! {
+    override public func create() -> Any! {
         if let singleton = self.singleton {
             return singleton
         }
@@ -15,7 +15,7 @@ class SingletonFactory<T>: Factory<T> {
         return self.singleton
     }
 
-    override func prototype() -> AnyFactory {
+    override public func prototype() -> AnyFactory {
         let prototype = Factory<T>(self.factory)
         prototype.name = self.name
         return prototype

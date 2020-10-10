@@ -5,10 +5,10 @@
 import Foundation
 
 @propertyWrapper
-class Singleton {
+public class Singleton {
     private var value: AnyFactory
 
-    var wrappedValue: AnyFactory  {
+    public var wrappedValue: AnyFactory  {
         get {
             value.singleton()
         }
@@ -21,7 +21,7 @@ class Singleton {
         }
     }
 
-    convenience init(wrappedValue: AnyFactory) {
+    convenience public init(wrappedValue: AnyFactory) {
         self.init(wrappedValue: wrappedValue, name: nil)
     }
 }

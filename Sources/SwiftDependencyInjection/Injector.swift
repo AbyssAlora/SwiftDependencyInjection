@@ -4,7 +4,7 @@
 
 import Foundation
 
-final class Injector {
+final public class Injector {
     private var container = [String: AnyFactory]()
 
     static let env = Injector()
