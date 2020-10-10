@@ -4,9 +4,9 @@
 
 import Foundation
 
-class Factory<T>: AnyFactory {
+public class Factory<T>: AnyFactory {
 
-    var name: String = String(describing: T.self)
+    public var name: String = String(describing: T.self)
 
     var factory: (Injector) -> T
 
@@ -14,17 +14,17 @@ class Factory<T>: AnyFactory {
         self.factory = create
     }
 
-    func create() -> Any! {
+    public func create() -> Any! {
         self.factory(self.environment)
     }
 
-    func singleton() -> AnyFactory {
+    public func singleton() -> AnyFactory {
         let singleton = SingletonFactory<T>(self.factory)
         singleton.name = self.name
         return singleton
     }
 
-    func prototype() -> AnyFactory {
+    public func prototype() -> AnyFactory {
         self
     }
 }

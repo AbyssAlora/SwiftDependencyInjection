@@ -5,10 +5,10 @@
 import Foundation
 
 @propertyWrapper
-class Prototype {
+public class Prototype {
     private var value: AnyFactory
 
-    var wrappedValue: AnyFactory {
+    public var wrappedValue: AnyFactory {
         get {
             value.prototype()
         }
@@ -21,7 +21,7 @@ class Prototype {
         }
     }
 
-    convenience init(wrappedValue: AnyFactory) {
+    convenience public init(wrappedValue: AnyFactory) {
         self.init(wrappedValue: wrappedValue, name: nil)
     }
 }

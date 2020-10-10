@@ -9,12 +9,12 @@ import Foundation
 
 //Property wrapper for Injectable classes
 @propertyWrapper
-class Inject<T> {
+public class Inject<T> {
     private(set) var value: T?
 
     private var environment = Injector.env
 
-    var wrappedValue: T? {
+    public var wrappedValue: T? {
         get {
             value
         }
@@ -28,7 +28,7 @@ class Inject<T> {
         self.value = self.environment.resolve(T.self, name: name)
     }
 
-    convenience init(wrappedValue: T? = nil) {
+    convenience public init(wrappedValue: T? = nil) {
         self.init(name: nil, wrappedValue: wrappedValue)
     }
 }

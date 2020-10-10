@@ -4,7 +4,7 @@
 
 import Foundation
 
-protocol Module {
+public protocol Module {
     func inject(name: String?, factory: AnyFactory)
     func inject<T>(name: String?, singleton: T)
     func inject<T>(name: String?, factory: @escaping () -> (T))

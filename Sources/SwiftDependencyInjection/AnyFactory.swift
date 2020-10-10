@@ -4,7 +4,7 @@
 
 import Foundation
 
-protocol AnyFactory {
+public protocol AnyFactory {
     func create() -> Any!
     var name: String { get set }
     var environment: Injector { get }
@@ -13,7 +13,7 @@ protocol AnyFactory {
 }
 
 extension AnyFactory {
-    var environment: Injector {
+    public var environment: Injector {
         Injector.env
     }
 }
