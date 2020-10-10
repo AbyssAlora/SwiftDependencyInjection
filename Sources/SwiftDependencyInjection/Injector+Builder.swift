@@ -4,7 +4,7 @@
 
 import Foundation
 
-extension Injector {
+public extension Injector {
     @_functionBuilder
     struct Builder {
         static func buildBlock(_ components: Component...) -> Void {

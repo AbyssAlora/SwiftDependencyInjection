@@ -13,24 +13,24 @@ public protocol Module {
     func register()
 }
 
-extension Module {
+public extension Module {
     private var environment: Injector {
         Injector.env
     }
 
-    public func inject(name: String? = nil, factory: AnyFactory) {
+    func inject(name: String? = nil, factory: AnyFactory) {
         self.environment.define(name: name, factory: factory)
     }
 
-    public func inject<T>(name: String? = nil, singleton: T) {
+    func inject<T>(name: String? = nil, singleton: T) {
         self.environment.define(name: name, singleton: singleton)
     }
 
-    public func inject<T>(name: String? = nil, factory: @escaping () -> (T)) {
+    func inject<T>(name: String? = nil, factory: @escaping () -> (T)) {
         self.environment.define(name: name, factory: factory)
     }
 
-    public func inject<T>(name: String?, factory: @escaping (Injector) -> (T)) {
+    func inject<T>(name: String?, factory: @escaping (Injector) -> (T)) {
         self.environment.define(name: name, factory: factory)
     }
 
