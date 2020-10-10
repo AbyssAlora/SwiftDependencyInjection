@@ -10,7 +10,7 @@ public class Factory<T>: AnyFactory {
 
     var factory: (Injector) -> T
 
-    init(_ create: @escaping (Injector) -> T) {
+    public init(_ create: @escaping (Injector) -> T) {
         self.factory = create
     }
 

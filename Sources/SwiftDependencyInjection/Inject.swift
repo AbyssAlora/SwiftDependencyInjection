@@ -23,7 +23,7 @@ public class Inject<T> {
         }
     }
 
-    init(name: String? = nil, wrappedValue: T? = nil) {
+    public init(name: String? = nil, wrappedValue: T? = nil) {
         let name = name ?? String(describing: T.self)
         self.value = self.environment.resolve(T.self, name: name)
     }
