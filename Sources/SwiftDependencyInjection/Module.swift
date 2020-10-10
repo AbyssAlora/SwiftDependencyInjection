@@ -18,19 +18,19 @@ extension Module {
         Injector.env
     }
 
-    func inject(name: String? = nil, factory: AnyFactory) {
+    public func inject(name: String? = nil, factory: AnyFactory) {
         self.environment.define(name: name, factory: factory)
     }
 
-    func inject<T>(name: String? = nil, singleton: T) {
+    public func inject<T>(name: String? = nil, singleton: T) {
         self.environment.define(name: name, singleton: singleton)
     }
 
-    func inject<T>(name: String? = nil, factory: @escaping () -> (T)) {
+    public func inject<T>(name: String? = nil, factory: @escaping () -> (T)) {
         self.environment.define(name: name, factory: factory)
     }
 
-    func inject<T>(name: String?, factory: @escaping (Injector) -> (T)) {
+    public func inject<T>(name: String?, factory: @escaping (Injector) -> (T)) {
         self.environment.define(name: name, factory: factory)
     }
 
