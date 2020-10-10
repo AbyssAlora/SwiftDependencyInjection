@@ -14,7 +14,7 @@ public class Prototype {
         }
     }
 
-    init(wrappedValue: AnyFactory, name: String? = nil) {
+    public init(wrappedValue: AnyFactory, name: String? = nil) {
         self.value = wrappedValue
         if let name = name {
             self.value.name = name
