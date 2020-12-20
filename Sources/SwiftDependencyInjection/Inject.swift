@@ -9,26 +9,32 @@ import Foundation
 
 //Property wrapper for Injectable classes
 @propertyWrapper
-public class Inject<T> {
+class Inject<T> {
     private(set) var value: T?
 
+    private var name: String
     private var environment = Injector.env
 
-    public var wrappedValue: T? {
+    var wrappedValue: T? {
         get {
-            value
+            if let value = self.value {
+                return value
+            }
+            self.value = self.environment.resolve(T.self, name: self.name)
+            return self.value
         }
         set {
             self.value = newValue
         }
     }
 
-    public init(name: String? = nil, wrappedValue: T? = nil) {
-        let name = name ?? String(describing: T.self)
-        self.value = self.environment.resolve(T.self, name: name)
+    init(name: String? = nil, wrappedValue: T? = nil) {
+        self.name = name ?? String(describing: T.self)
+        self.value = self.environment.resolve(T.self, name: self.name)
     }
 
-    convenience public init(wrappedValue: T? = nil) {
+    convenience init(wrappedValue: T? = nil) {
         self.init(name: nil, wrappedValue: wrappedValue)
     }
 }
+
